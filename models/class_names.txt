@@ -1,0 +1,11 @@
+Apple___Apple_scab
+Apple___healthy
+Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+Corn_(maize)___Northern_Leaf_Blight
+Grape___Black_rot
+Grape___Leaf_blight
+Grape___healthy
+Orange___Haunglongbing_(Citrus_greening)
+Strawberry___Leaf_scorch
+Tomato___Bacterial_spot
+Tomato___Early_blight
