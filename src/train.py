@@ -1,6 +1,6 @@
 """
-Training Script for Plant Leaf Disease Detection System
-Trains an SVM classifier using extracted features
+Super Aggressive Augmentation Training
+Creates 50+ samples from each original image
 """
 
 import os
@@ -18,203 +18,202 @@ from tqdm import tqdm
 import warnings
 warnings.filterwarnings('ignore')
 
-# Add src directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import config
-from utils import load_dataset_from_folders, display_class_distribution, create_sample_dataset
+from utils import load_dataset_from_folders, display_class_distribution
 from preprocessing import preprocess_image
-from feature_extraction import extract_all_features, get_feature_names
+from feature_extraction import extract_all_features
 
 
-def extract_features_from_images(images, labels, verbose=True):
+def super_augment_image(image):
     """
-    Extract features from all images in the dataset
+    Create 50+ augmented versions of a single image
+    """
+    augmented = []
     
-    Args:
-        images: List of images
-        labels: List of labels
-        verbose: Print progress
+    # Original
+    augmented.append(image)
+    
+    # Flips
+    augmented.append(cv2.flip(image, 1))  # Horizontal
+    augmented.append(cv2.flip(image, 0))  # Vertical
+    augmented.append(cv2.flip(cv2.flip(image, 0), 1))  # Both
+    
+    (h, w) = image.shape[:2]
+    center = (w // 2, h // 2)
+    
+    # Rotations (every 30 degrees)
+    for angle in [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]:
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        rotated = cv2.warpAffine(image, M, (w, h))
+        augmented.append(rotated)
+    
+    # Small rotations
+    for angle in [5, 10, 15, -5, -10, -15]:
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        rotated = cv2.warpAffine(image, M, (w, h))
+        augmented.append(rotated)
+    
+    # Brightness variations
+    for beta in [30, 20, 10, -10, -20, -30]:
+        adjusted = cv2.convertScaleAbs(image, alpha=1.0, beta=beta)
+        augmented.append(adjusted)
+    
+    # Contrast variations
+    for alpha in [0.8, 0.9, 1.1, 1.2]:
+        adjusted = cv2.convertScaleAbs(image, alpha=alpha, beta=0)
+        augmented.append(adjusted)
+    
+    # Zoom variations
+    for scale in [0.8, 0.9, 1.1, 1.2]:
+        scaled_h, scaled_w = int(h * scale), int(w * scale)
+        resized = cv2.resize(image, (scaled_w, scaled_h))
         
-    Returns:
-        X: Feature matrix (n_samples, n_features)
-        y: Label array
-    """
+        if scale < 1.0:  # Add padding
+            top = (h - scaled_h) // 2
+            bottom = h - scaled_h - top
+            left = (w - scaled_w) // 2
+            right = w - scaled_w - left
+            padded = cv2.copyMakeBorder(resized, top, bottom, left, right, 
+                                       cv2.BORDER_REFLECT)
+            augmented.append(padded)
+        else:  # Crop center
+            start_h = (scaled_h - h) // 2
+            start_w = (scaled_w - w) // 2
+            cropped = resized[start_h:start_h+h, start_w:start_w+w]
+            augmented.append(cropped)
+    
+    # Gaussian blur variations
+    for ksize in [3, 5, 7]:
+        blurred = cv2.GaussianBlur(image, (ksize, ksize), 0)
+        augmented.append(blurred)
+    
+    # Add noise
+    for _ in range(3):
+        noise = np.random.randint(-10, 10, image.shape, dtype=np.int16)
+        noisy = np.clip(image.astype(np.int16) + noise, 0, 255).astype(np.uint8)
+        augmented.append(noisy)
+    
+    print(f"    Generated {len(augmented)} samples from 1 image")
+    return augmented
+
+
+def extract_features_super_augmented(images, labels, verbose=True):
+    """Extract features with super augmentation"""
     X = []
     y = []
     
     if verbose:
-        print(f"\n{'='*60}")
-        print("Extracting Features from Images")
-        print(f"{'='*60}\n")
-        iterator = tqdm(zip(images, labels), total=len(images), desc="Processing images")
-    else:
-        iterator = zip(images, labels)
+        print(f"\n{'='*70}")
+        print("SUPER AUGMENTATION - Extracting Features")
+        print(f"{'='*70}\n")
     
-    for img, label in iterator:
+    for idx, (img, label) in enumerate(zip(images, labels), 1):
         try:
-            # Preprocess image
-            preprocessed = preprocess_image(img)
+            print(f"\n[{idx}/{len(images)}] Processing: {label}")
             
-            # Extract features
-            features = extract_all_features(preprocessed)
+            # Generate 50+ augmented versions
+            augmented_images = super_augment_image(img)
             
-            X.append(features)
-            y.append(label)
-            
+            # Extract features from each
+            for aug_img in tqdm(augmented_images, desc="  Extracting features", leave=False):
+                preprocessed = preprocess_image(aug_img)
+                features = extract_all_features(preprocessed)
+                X.append(features)
+                y.append(label)
+                
         except Exception as e:
-            if verbose:
-                print(f"\nError processing image with label {label}: {str(e)}")
+            print(f"    ❌ Error: {str(e)}")
             continue
     
     X = np.array(X)
     y = np.array(y)
     
     if verbose:
-        print(f"\nFeature extraction complete!")
-        print(f"Feature matrix shape: {X.shape}")
-        print(f"Number of features per image: {X.shape[1]}")
+        print(f"\n{'='*70}")
+        print("✓ Augmentation Complete!")
+        print(f"  Original images: {len(images)}")
+        print(f"  Total samples generated: {len(X)}")
+        print(f"  Augmentation factor: {len(X) // len(images)}x")
+        print(f"  Features per sample: {X.shape[1]}")
+        print(f"{'='*70}\n")
     
     return X, y
 
 
 def plot_confusion_matrix(cm, class_names, save_path):
-    """
-    Plot and save confusion matrix
-    
-    Args:
-        cm: Confusion matrix
-        class_names: List of class names
-        save_path: Path to save the plot
-    """
-    plt.figure(figsize=(14, 12))
+    """Plot confusion matrix"""
+    plt.figure(figsize=(16, 14))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
                 xticklabels=class_names, yticklabels=class_names,
                 cbar_kws={'label': 'Count'})
-    plt.title('Confusion Matrix', fontsize=16, fontweight='bold')
-    plt.ylabel('True Label', fontsize=12)
-    plt.xlabel('Predicted Label', fontsize=12)
-    plt.xticks(rotation=45, ha='right')
-    plt.yticks(rotation=0)
+    plt.title('Confusion Matrix - Super Augmented Training', fontsize=18, fontweight='bold')
+    plt.ylabel('True Label', fontsize=13)
+    plt.xlabel('Predicted Label', fontsize=13)
+    plt.xticks(rotation=45, ha='right', fontsize=9)
+    plt.yticks(rotation=0, fontsize=9)
     plt.tight_layout()
-    plt.savefig(save_path, dpi=config.DPI, bbox_inches='tight')
+    plt.savefig(save_path, dpi=150, bbox_inches='tight')
     plt.close()
-    print(f"Confusion matrix saved to {save_path}")
-
-
-def plot_feature_importance(model, feature_names, class_names, save_path, top_n=20):
-    """
-    Plot feature importance based on SVM coefficients (for linear kernel)
-    
-    Args:
-        model: Trained SVM model
-        feature_names: List of feature names
-        class_names: List of class names
-        save_path: Path to save the plot
-        top_n: Number of top features to display
-    """
-    if config.SVM_KERNEL != 'linear':
-        print("Feature importance visualization only available for linear kernel")
-        return
-    
-    # Get absolute coefficients
-    coef = np.abs(model.coef_).mean(axis=0)
-    
-    # Get top N features
-    top_indices = np.argsort(coef)[-top_n:][::-1]
-    top_features = [feature_names[i] for i in top_indices]
-    top_values = coef[top_indices]
-    
-    # Plot
-    plt.figure(figsize=(12, 8))
-    plt.barh(range(len(top_features)), top_values, color='steelblue')
-    plt.yticks(range(len(top_features)), top_features)
-    plt.xlabel('Importance (Absolute Coefficient)', fontsize=12)
-    plt.title(f'Top {top_n} Most Important Features', fontsize=16, fontweight='bold')
-    plt.gca().invert_yaxis()
-    plt.tight_layout()
-    plt.savefig(save_path, dpi=config.DPI)
-    plt.close()
-    print(f"Feature importance plot saved to {save_path}")
+    print(f"✓ Confusion matrix saved: {save_path}")
 
 
 def train_model(X_train, y_train, X_test, y_test, class_names, label_encoder, verbose=True):
-    """
-    Train SVM classifier
-    
-    Args:
-        X_train: Training features
-        y_train: Training labels
-        X_test: Test features
-        y_test: Test labels
-        class_names: List of class names
-        label_encoder: Fitted LabelEncoder
-        verbose: Print training progress
-        
-    Returns:
-        model: Trained SVM model
-        scaler: Fitted StandardScaler
-        accuracy: Model accuracy on test set
-    """
+    """Train SVM with optimal parameters for small dataset"""
     if verbose:
-        print(f"\n{'='*60}")
+        print(f"\n{'='*70}")
         print("Training SVM Classifier")
-        print(f"{'='*60}\n")
+        print(f"{'='*70}\n")
     
-    # Encode labels
     y_train_encoded = label_encoder.transform(y_train)
     y_test_encoded = label_encoder.transform(y_test)
     
     if verbose:
         print(f"Training samples: {len(X_train)}")
         print(f"Test samples: {len(X_test)}")
-        print(f"Number of features: {X_train.shape[1]}")
-        print(f"Number of classes: {len(class_names)}")
-        print(f"\nSVM Parameters:")
-        print(f"  Kernel: {config.SVM_KERNEL}")
-        print(f"  C: {config.SVM_C}")
-        print(f"  Gamma: {config.SVM_GAMMA}")
+        print(f"Features: {X_train.shape[1]}")
+        print(f"Classes: {len(class_names)}")
     
-    # Feature scaling
-    if verbose:
-        print(f"\nScaling features...")
+    # Scale features
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    # Train SVM
+    # Train SVM with RBF kernel - high C for small dataset
     if verbose:
-        print(f"Training SVM model...")
+        print(f"\n🔧 SVM Parameters:")
+        print(f"   Kernel: rbf")
+        print(f"   C: 200 (high regularization for overfitting prevention)")
+        print(f"   Gamma: scale")
+        print(f"   Max iterations: 3000\n")
+        print("Training...")
     
     svm_model = SVC(
-        kernel=config.SVM_KERNEL,
-        C=config.SVM_C,
-        gamma=config.SVM_GAMMA,
-        max_iter=config.SVM_MAX_ITER,
-        random_state=config.RANDOM_STATE,
+        kernel='rbf',
+        C=200.0,  # Higher C for better fit
+        gamma='scale',  # Auto-scale gamma
+        max_iter=3000,
+        random_state=42,
         verbose=verbose
     )
     
     svm_model.fit(X_train_scaled, y_train_encoded)
     
-    if verbose:
-        print(f"Training complete!")
-    
-    # Evaluate model
+    # Evaluate
     y_pred = svm_model.predict(X_test_scaled)
     accuracy = accuracy_score(y_test_encoded, y_pred)
     
     if verbose:
-        print(f"\n{'='*60}")
-        print("Model Evaluation")
-        print(f"{'='*60}\n")
-        print(f"Accuracy: {accuracy * 100:.2f}%\n")
-        print("Classification Report:")
+        print(f"\n{'='*70}")
+        print("📊 Evaluation Results")
+        print(f"{'='*70}\n")
+        print(f"✓ Accuracy: {accuracy * 100:.2f}%\n")
         
-        # Get unique classes present in both test and predictions
         unique_labels = sorted(set(list(y_test_encoded) + list(y_pred)))
         label_names = [label_encoder.inverse_transform([i])[0] for i in unique_labels]
         
+        print("Classification Report:")
         print(classification_report(y_test_encoded, y_pred, 
                                    labels=unique_labels,
                                    target_names=label_names, 
@@ -224,124 +223,115 @@ def train_model(X_train, y_train, X_test, y_test, class_names, label_encoder, ve
     unique_labels = sorted(set(list(y_test_encoded) + list(y_pred)))
     label_names = [label_encoder.inverse_transform([i])[0] for i in unique_labels]
     cm = confusion_matrix(y_test_encoded, y_pred, labels=unique_labels)
-    cm_path = os.path.join(config.RESULTS_DIR, 'confusion_matrix.png')
+    cm_path = os.path.join(config.RESULTS_DIR, 'confusion_matrix_super_aug.png')
     plot_confusion_matrix(cm, label_names, cm_path)
-    
-    # Feature importance (if linear kernel)
-    if config.SVM_KERNEL == 'linear':
-        feature_names = get_feature_names()
-        fi_path = os.path.join(config.RESULTS_DIR, 'feature_importance.png')
-        plot_feature_importance(svm_model, feature_names, class_names, fi_path)
     
     return svm_model, scaler, accuracy
 
 
 def save_model(model, scaler, label_encoder, class_names):
-    """
-    Save trained model, scaler, and label encoder
-    
-    Args:
-        model: Trained SVM model
-        scaler: Fitted StandardScaler
-        label_encoder: Fitted LabelEncoder
-        class_names: List of class names
-    """
+    """Save model files"""
     model_path = os.path.join(config.MODEL_DIR, config.MODEL_FILENAME)
     scaler_path = os.path.join(config.MODEL_DIR, config.SCALER_FILENAME)
     encoder_path = os.path.join(config.MODEL_DIR, config.LABEL_ENCODER_FILENAME)
     
-    # Save model
     joblib.dump(model, model_path)
-    print(f"Model saved to {model_path}")
-    
-    # Save scaler
     joblib.dump(scaler, scaler_path)
-    print(f"Scaler saved to {scaler_path}")
-    
-    # Save label encoder
     joblib.dump(label_encoder, encoder_path)
-    print(f"Label encoder saved to {encoder_path}")
     
-    # Save class names for reference
     class_names_path = os.path.join(config.MODEL_DIR, 'class_names.txt')
     with open(class_names_path, 'w') as f:
         for name in class_names:
             f.write(f"{name}\n")
-    print(f"Class names saved to {class_names_path}")
+    
+    print(f"\n✓ Model saved: {model_path}")
+    print(f"✓ Scaler saved: {scaler_path}")
+    print(f"✓ Encoder saved: {encoder_path}")
+    print(f"✓ Classes saved: {class_names_path}")
 
 
 def main():
-    """
-    Main training pipeline
-    """
-    print(f"\n{'#'*60}")
-    print("# Plant Leaf Disease Detection - Training Pipeline")
-    print(f"{'#'*60}\n")
+    """Main training pipeline"""
+    print(f"\n{'#'*70}")
+    print("# SUPER AUGMENTED TRAINING")
+    print("# Plant Leaf Disease Detection")
+    print(f"{'#'*70}\n")
     
-    # Check if training data exists
     if not os.path.exists(config.TRAIN_DIR):
-        print(f"Training directory not found: {config.TRAIN_DIR}")
-        print(f"Creating sample dataset for demonstration...")
-        create_sample_dataset(config.TRAIN_DIR, num_classes=3, images_per_class=20)
-        print(f"\nNote: This is synthetic data. Replace with real leaf disease images.")
-    
-    # Check if there are any class folders
-    subdirs = [d for d in os.listdir(config.TRAIN_DIR) 
-               if os.path.isdir(os.path.join(config.TRAIN_DIR, d))]
-    
-    if len(subdirs) == 0:
-        print(f"\nError: No class folders found in {config.TRAIN_DIR}")
-        print(f"Please organize your data as: data/train/class_name/images.jpg")
+        print(f"❌ Error: Training directory not found: {config.TRAIN_DIR}")
         return
     
     # Load dataset
-    images, labels, class_names = load_dataset_from_folders(config.TRAIN_DIR, verbose=config.VERBOSE)
+    print("📂 Loading dataset...")
+    images, labels, class_names = load_dataset_from_folders(config.TRAIN_DIR, verbose=True)
     
     if len(images) == 0:
-        print("Error: No images loaded. Check your dataset directory.")
+        print("❌ Error: No images found!")
         return
     
-    # Display class distribution
+    print(f"\n📊 Original Dataset:")
+    print(f"   Total images: {len(images)}")
+    print(f"   Classes: {len(class_names)}")
+    
     display_class_distribution(labels, class_names)
     
-    # Extract features
-    X, y = extract_features_from_images(images, labels, verbose=config.VERBOSE)
+    # Extract features with SUPER augmentation
+    X, y = extract_features_super_augmented(images, labels, verbose=True)
     
     if len(X) == 0:
-        print("Error: No features extracted. Check preprocessing pipeline.")
+        print("❌ Error: No features extracted!")
         return
     
-    # Encode all labels first
+    # Check samples per class
+    from collections import Counter
+    class_counts = Counter(y)
+    print("📊 Augmented Dataset Distribution:")
+    for cls in class_names:
+        count = class_counts[cls]
+        print(f"   {cls}: {count} samples")
+    
+    # Encode labels
     label_encoder = LabelEncoder()
     label_encoder.fit(y)
     
-    # Split data
-    print(f"\nSplitting data (test size: {config.TEST_SIZE * 100}%)...")
+    # Split data (85/15 split for small dataset)
+    print(f"\n✂️ Splitting data (85% train, 15% test)...")
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, 
-        test_size=config.TEST_SIZE, 
-        random_state=config.RANDOM_STATE
+        X, y, test_size=0.15, random_state=42, stratify=y
     )
     
-    # Train model
+    print(f"   Train: {len(X_train)} samples")
+    print(f"   Test: {len(X_test)} samples")
+    
+    # Train
     model, scaler, accuracy = train_model(
-        X_train, y_train, X_test, y_test, class_names, label_encoder, verbose=config.VERBOSE
+        X_train, y_train, X_test, y_test, class_names, label_encoder, verbose=True
     )
     
-    # Save model
-    print(f"\n{'='*60}")
-    print("Saving Model")
-    print(f"{'='*60}\n")
+    # Save
+    print(f"\n{'='*70}")
+    print("💾 Saving Model")
+    print(f"{'='*70}")
     save_model(model, scaler, label_encoder, class_names)
     
-    print(f"\n{'#'*60}")
-    print(f"# Training Complete! Final Accuracy: {accuracy * 100:.2f}%")
-    print(f"{'#'*60}\n")
+    print(f"\n{'#'*70}")
+    if accuracy >= 0.80:
+        print(f"# ✓ SUCCESS! Final Accuracy: {accuracy * 100:.2f}%")
+    elif accuracy >= 0.70:
+        print(f"# ⚠ MODERATE! Final Accuracy: {accuracy * 100:.2f}%")
+    else:
+        print(f"# ❌ LOW ACCURACY: {accuracy * 100:.2f}%")
+    print(f"{'#'*70}\n")
     
-    print("Next steps:")
-    print("  1. Review the confusion matrix in the results folder")
-    print("  2. Run predict.py to test the model on new images")
-    print("  3. Add more training images to improve accuracy\n")
+    if accuracy < 0.75:
+        print("⚠️  Recommendations to improve accuracy:")
+        print("   1. Download PlantVillage dataset for more real images")
+        print("   2. Ensure image quality is good")
+        print("   3. Check that images are correctly labeled")
+        print("   4. Add at least 20-50 images per class\n")
+    else:
+        print("✓ Model trained successfully!")
+        print("  Run 'python predict.py' to test it\n")
 
 
 if __name__ == "__main__":

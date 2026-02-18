@@ -1,0 +1,192 @@
+{
+  "Apple___Apple_scab": {
+    "disease_name": "Apple Scab",
+    "plant": "Apple",
+    "description": "Fungal disease causing dark, scabby lesions on leaves and fruits",
+    "causes": ["Fungal infection by Venturia inaequalis", "High humidity and wet conditions", "Poor air circulation"],
+    "chemical_treatments": [
+      {"name": "Mancozeb 75% WP", "dosage": "2-2.5 grams per liter", "application": "Spray every 10-15 days during rainy season", "cost": "₹200-300 per 500g"},
+      {"name": "Carbendazim 50% WP", "dosage": "1 gram per liter", "application": "Spray at 15-day intervals", "cost": "₹150-200 per 100g"}
+    ],
+    "organic_treatments": [
+      {"name": "Neem Oil", "dosage": "5ml per liter", "application": "Spray weekly on affected plants", "cost": "₹100-150 per liter"},
+      {"name": "Baking Soda Solution", "dosage": "1 tbsp soda + 1 tbsp oil per liter", "application": "Spray every 7 days", "cost": "₹50 (homemade)"}
+    ],
+    "prevention_tips": ["Remove and destroy infected leaves immediately", "Prune trees to improve air circulation", "Avoid overhead watering", "Apply fungicides before rainy season", "Plant resistant varieties"],
+    "when_to_treat": "Treat immediately when spots appear. Best results in early stage."
+  },
+  
+  "Apple___healthy": {
+    "disease_name": "Healthy Leaf",
+    "plant": "Apple",
+    "description": "No disease detected. Leaf is healthy.",
+    "causes": [],
+    "chemical_treatments": [],
+    "organic_treatments": [],
+    "prevention_tips": ["Continue regular monitoring", "Maintain proper watering schedule", "Ensure adequate nutrition", "Keep area clean from fallen leaves", "Regular inspection for early detection"],
+    "when_to_treat": "No treatment needed. Continue preventive care."
+  },
+
+  "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot": {
+    "disease_name": "Cercospora Leaf Spot (Gray Leaf Spot)",
+    "plant": "Corn/Maize",
+    "description": "Fungal disease causing gray rectangular lesions on corn leaves",
+    "causes": ["Cercospora zeae-maydis fungus", "High humidity and warm temperatures", "Continuous maize cultivation", "Infected crop residue"],
+    "chemical_treatments": [
+      {"name": "Propiconazole 25% EC", "dosage": "1ml per liter of water", "application": "Spray at first sign of disease, repeat at 15-day intervals", "cost": "₹500-600 per 100ml"},
+      {"name": "Azoxystrobin + Difenoconazole", "dosage": "1.5ml per liter", "application": "Apply at tasseling stage, repeat if needed", "cost": "₹800-900 per 100ml"},
+      {"name": "Tebuconazole 25% EC", "dosage": "1ml per liter", "application": "Spray when lesions first appear", "cost": "₹450-550 per 100ml"}
+    ],
+    "organic_treatments": [
+      {"name": "Trichoderma harzianum", "dosage": "5 grams per liter", "application": "Spray every 15 days starting from 30 days after planting", "cost": "₹200-300 per 100g"},
+      {"name": "Garlic + Chili Extract", "dosage": "50ml extract per liter", "application": "Spray weekly on affected plants", "cost": "₹100 (homemade)"},
+      {"name": "Neem Oil + Soap", "dosage": "5ml neem oil + few drops soap per liter", "application": "Spray twice weekly", "cost": "₹120-150"}
+    ],
+    "prevention_tips": ["Plant resistant maize hybrids", "Rotate crops with non-host crops (soybean, wheat) for 2-3 years", "Plow under or remove crop residue immediately after harvest", "Avoid planting in poorly drained areas", "Increase plant spacing for better air circulation", "Apply balanced fertilization, avoid excess nitrogen"],
+    "when_to_treat": "Treat when lesions first appear on leaves, especially before tasseling. Late treatment is less effective."
+  },
+
+  "Corn_(maize)___Northern_Leaf_Blight": {
+    "disease_name": "Northern Leaf Blight",
+    "plant": "Corn/Maize",
+    "description": "Serious fungal disease causing long cigar-shaped gray-green lesions on corn leaves",
+    "causes": ["Exserohilum turcicum fungus", "Cool temperatures (18-27°C) with high humidity", "Infected crop debris left in field", "Dense planting reducing air circulation"],
+    "chemical_treatments": [
+      {"name": "Mancozeb 75% WP", "dosage": "2.5 grams per liter", "application": "Spray at 10-15 day intervals, start when disease first appears", "cost": "₹200-300 per 500g"},
+      {"name": "Tebuconazole 25% EC", "dosage": "1ml per liter", "application": "Apply at disease onset, repeat after 15 days", "cost": "₹500-600 per 100ml"},
+      {"name": "Propiconazole 25% EC", "dosage": "1ml per liter", "application": "Spray when lower leaves show symptoms", "cost": "₹500-600 per 100ml"}
+    ],
+    "organic_treatments": [
+      {"name": "Bacillus subtilis", "dosage": "10 grams per liter", "application": "Spray every 10 days as preventive measure", "cost": "₹250-350 per 100g"},
+      {"name": "Neem + Turmeric Paste", "dosage": "20g neem powder + 10g turmeric per liter", "application": "Spray twice weekly on affected plants", "cost": "₹80-100"},
+      {"name": "Copper Oxychloride 50% WP", "dosage": "3g per liter", "application": "Spray at 10-day intervals", "cost": "₹150-200 per 500g"}
+    ],
+    "prevention_tips": ["Use resistant or tolerant maize varieties", "Completely bury or remove all crop residue after harvest", "Rotate crops - avoid planting maize for 2-3 years in infected fields", "Avoid excessive nitrogen fertilizer which promotes disease", "Plant at recommended spacing to ensure good air circulation", "Scout fields regularly, especially lower leaves", "Avoid overhead irrigation if possible"],
+    "when_to_treat": "Begin treatment immediately when lesions first appear on lower leaves. Do not wait for disease to spread upward to upper leaves."
+  },
+
+  "Grape___Black_rot": {
+    "disease_name": "Black Rot",
+    "plant": "Grape",
+    "description": "Devastating fungal disease affecting all green parts of grape vines, causing fruit to rot and mummify",
+    "causes": ["Guignardia bidwellii fungus", "Warm weather (25-30°C) with frequent rainfall", "Poor vineyard sanitation with mummified fruit left on vines", "Humid conditions favoring spore germination"],
+    "chemical_treatments": [
+      {"name": "Copper Oxychloride 50% WP", "dosage": "3 grams per liter", "application": "Spray before flowering, after fruit set, and during berry development", "cost": "₹150-250 per 500g"},
+      {"name": "Hexaconazole 5% EC", "dosage": "2ml per liter", "application": "Apply at 15-day intervals during rainy season", "cost": "₹400-500 per 100ml"},
+      {"name": "Mancozeb 75% WP", "dosage": "2.5g per liter", "application": "Spray from bud break through harvest at 10-14 day intervals", "cost": "₹200-300 per 500g"}
+    ],
+    "organic_treatments": [
+      {"name": "Bordeaux Mixture", "dosage": "100g copper sulphate + 100g lime per 10 liters", "application": "Spray before rain, repeat after heavy rain", "cost": "₹80-120 per kg"},
+      {"name": "Trichoderma Viride", "dosage": "5 grams per liter", "application": "Spray every 10 days throughout growing season", "cost": "₹200-300 per 100g"},
+      {"name": "Potassium Bicarbonate", "dosage": "5g per liter + few drops oil", "application": "Spray weekly during humid periods", "cost": "₹100-150 per kg"}
+    ],
+    "prevention_tips": ["Remove ALL mummified fruits from vines and ground before spring", "Prune vines to ensure excellent air circulation and sunlight penetration", "Avoid excessive nitrogen fertilizer which promotes lush growth", "Plant resistant grape varieties if available", "Sanitize all pruning tools between cuts", "Keep vineyard floor clean and weed-free", "Apply dormant spray with lime sulfur before bud break"],
+    "when_to_treat": "Start treatment IMMEDIATELY when first spots appear. Black rot spreads extremely rapidly during warm, humid weather. Preventive sprays are critical."
+  },
+
+  "Grape___Leaf_blight": {
+    "disease_name": "Grape Leaf Blight (Isariopsis Leaf Spot)",
+    "plant": "Grape",
+    "description": "Fungal disease causing irregular brown lesions with yellow halos, leading to premature defoliation",
+    "causes": ["Multiple fungal pathogens including Pseudocercospora vitis", "High humidity and poor air circulation", "Dense, crowded foliage", "Overhead irrigation wetting leaves"],
+    "chemical_treatments": [
+      {"name": "Mancozeb 75% WP", "dosage": "2.5 grams per liter", "application": "Spray at 10-day intervals during rainy season", "cost": "₹200-300 per 500g"},
+      {"name": "Chlorothalonil 75% WP", "dosage": "2 grams per liter", "application": "Apply every 2 weeks, alternate with other fungicides", "cost": "₹300-400 per 250g"},
+      {"name": "Carbendazim 50% WP", "dosage": "1g per liter", "application": "Spray at 15-day intervals", "cost": "₹150-200 per 100g"}
+    ],
+    "organic_treatments": [
+      {"name": "Neem Oil + Garlic Extract", "dosage": "5ml neem oil + 10ml garlic extract per liter", "application": "Spray weekly, especially undersides of leaves", "cost": "₹150-200"},
+      {"name": "Cow Urine Fermented Solution", "dosage": "100ml fermented cow urine per liter water", "application": "Spray twice a week early morning", "cost": "Free (organic farm input)"},
+      {"name": "Baking Soda Spray", "dosage": "5g baking soda + 5ml oil per liter", "application": "Spray every 5-7 days", "cost": "₹50-80"}
+    ],
+    "prevention_tips": ["Remove and destroy all infected leaves immediately", "Improve air circulation by proper pruning and thinning", "Avoid overhead irrigation - use drip irrigation at soil level", "Apply thick organic mulch to prevent soil splash onto leaves", "Ensure adequate spacing between vines (minimum 6-8 feet)", "Remove weeds that block airflow", "Apply preventive fungicides before monsoon season"],
+    "when_to_treat": "Treat as soon as first symptoms appear on leaves. Disease is most manageable in early stages before widespread defoliation occurs."
+  },
+
+  "Grape___healthy": {
+    "disease_name": "Healthy Grape Leaf",
+    "plant": "Grape",
+    "description": "No disease detected. Vine and leaves are healthy.",
+    "causes": [],
+    "chemical_treatments": [],
+    "organic_treatments": [],
+    "prevention_tips": ["Continue current vineyard care practices", "Monitor vines regularly for any disease signs", "Maintain proper nutrition with balanced fertilization", "Ensure excellent vineyard sanitation", "Check for insect pests weekly", "Prune regularly for good air circulation"],
+    "when_to_treat": "No treatment needed. Continue preventive monitoring and good cultural practices."
+  },
+
+  "Orange___Haunglongbing_(Citrus_greening)": {
+    "disease_name": "Huanglongbing (Citrus Greening Disease - HLB)",
+    "plant": "Orange/Citrus",
+    "description": "MOST DEVASTATING citrus disease worldwide. Bacterial infection transmitted by Asian citrus psyllid. NO CURE EXISTS. Infected trees will die within 3-5 years.",
+    "causes": ["Candidatus Liberibacter asiaticus bacteria", "Transmitted exclusively by Asian citrus psyllid insect", "Use of infected budwood or nursery plants", "Cannot spread by direct tree contact or soil"],
+    "chemical_treatments": [
+      {"name": "Imidacloprid 17.8% SL (PSYLLID CONTROL ONLY)", "dosage": "0.5ml per liter", "application": "Soil drench every 6 months to kill psyllid vectors", "cost": "₹400-500 per 100ml"},
+      {"name": "Thiamethoxam 25% WG (PSYLLID CONTROL)", "dosage": "0.5g per liter", "application": "Foliar spray monthly during psyllid season", "cost": "₹300-400 per 100g"},
+      {"name": "Nutrient Supplements (Zinc, Manganese, Iron)", "dosage": "As per soil test recommendations", "application": "Foliar spray monthly to reduce symptoms temporarily", "cost": "₹300-500 per application"}
+    ],
+    "organic_treatments": [
+      {"name": "Neem Oil (PSYLLID CONTROL ONLY)", "dosage": "5ml per liter water", "application": "Spray every 10 days targeting new flush where psyllids feed", "cost": "₹100-150 per liter"},
+      {"name": "Horticultural Oil", "dosage": "10ml per liter", "application": "Spray on new growth to suffocate psyllid eggs and nymphs", "cost": "₹200-300 per liter"},
+      {"name": "Yellow Sticky Traps", "dosage": "20-30 traps per acre", "application": "Place traps to monitor and catch adult psyllids", "cost": "₹5-10 per trap"}
+    ],
+    "prevention_tips": ["IMMEDIATELY remove and DESTROY any infected tree (burn or bury deep) to prevent spread", "Control Asian citrus psyllid population AGGRESSIVELY with insecticides", "Use ONLY certified disease-free nursery plants from registered nurseries", "NEVER use budwood from unknown or backyard sources", "Monitor ALL citrus trees in area every 2 weeks for symptoms", "Apply systemic insecticides preventively every 6 months", "Cover young trees with insect-proof nets (50-mesh)", "Maintain tree nutrition to slow symptom development", "Report suspected cases to agricultural authorities immediately"],
+    "when_to_treat": "CRITICAL: There is NO CURE for HLB. Focus entirely on PREVENTION and aggressive PSYLLID CONTROL. Once a tree is infected, it MUST be removed immediately to protect other trees. Do not waste money on treatments for infected trees - remove them!"
+  },
+
+  "Strawberry___Leaf_scorch": {
+    "disease_name": "Strawberry Leaf Scorch",
+    "plant": "Strawberry",
+    "description": "Fungal disease causing purple to brown spots with scorched leaf margins, reducing plant vigor and fruit yield",
+    "causes": ["Diplocarpon earlianum fungus", "Warm temperatures (20-25°C) with high humidity", "Water splash from rain or overhead irrigation spreading spores", "Infected plant material or contaminated soil"],
+    "chemical_treatments": [
+      {"name": "Captan 50% WP", "dosage": "2 grams per liter", "application": "Spray every 10-14 days during growing season", "cost": "₹200-300 per 250g"},
+      {"name": "Azoxystrobin 23% SC", "dosage": "1ml per liter", "application": "Apply at 2-week intervals, maximum 3 applications per season", "cost": "₹600-700 per 100ml"},
+      {"name": "Myclobutanil 10% WP", "dosage": "0.5g per liter", "application": "Spray at first sign of disease", "cost": "₹400-500 per 100g"}
+    ],
+    "organic_treatments": [
+      {"name": "Neem Oil", "dosage": "5ml per liter water", "application": "Spray weekly during humid weather, cover both leaf surfaces", "cost": "₹100-150 per liter"},
+      {"name": "Copper Sulfate (Organic formulation)", "dosage": "1 gram per liter", "application": "Apply before rainy season as preventive", "cost": "₹100-150 per kg"},
+      {"name": "Bacillus subtilis", "dosage": "10g per liter", "application": "Spray every 7-10 days throughout season", "cost": "₹200-300 per 100g"}
+    ],
+    "prevention_tips": ["Remove and destroy old infected leaves before new growth starts", "Use drip irrigation instead of overhead sprinklers", "Space plants adequately (12-15 inches apart) for good air circulation", "Apply thick straw mulch around plants to prevent soil splash", "Use resistant strawberry varieties when available", "Renovate strawberry beds immediately after harvest", "Remove weeds that block airflow and harbor disease", "Avoid working in wet strawberry beds"],
+    "when_to_treat": "Start treatment when first purple spots appear on leaves. Disease is much easier to control in early stages before extensive leaf damage."
+  },
+
+  "Tomato___Bacterial_spot": {
+    "disease_name": "Bacterial Spot of Tomato",
+    "plant": "Tomato",
+    "description": "Serious bacterial disease causing dark greasy spots on leaves, stems and fruits, leading to severe defoliation and fruit damage",
+    "causes": ["Xanthomonas bacteria (multiple species)", "Water splash from rain or overhead irrigation", "Contaminated seeds or infected transplants", "Warm wet conditions (25-30°C with high humidity)", "Wounds from insects or mechanical damage"],
+    "chemical_treatments": [
+      {"name": "Streptocycline 9% + Tetracycline 1%", "dosage": "1 gram per 10 liters of water", "application": "Spray at 10-day intervals, maximum 3 applications", "cost": "₹300-400 per 100g"},
+      {"name": "Copper Hydroxide 77% WP", "dosage": "2.5 grams per liter", "application": "Apply weekly during disease-favorable weather", "cost": "₹250-350 per 500g"},
+      {"name": "Copper Oxychloride 50% WP", "dosage": "3g per liter", "application": "Spray at 7-10 day intervals", "cost": "₹150-250 per 500g"}
+    ],
+    "organic_treatments": [
+      {"name": "Pseudomonas fluorescens", "dosage": "10 grams per liter", "application": "Spray every 7 days as preventive and curative", "cost": "₹150-250 per 100g"},
+      {"name": "Fermented Neem Cake Extract", "dosage": "50 grams neem cake fermented in water per liter", "application": "Spray twice weekly", "cost": "₹80-100 per kg neem cake"},
+      {"name": "Garlic + Ginger Extract", "dosage": "50ml extract per liter", "application": "Spray every 5 days", "cost": "₹80-120"}
+    ],
+    "prevention_tips": ["Use ONLY certified disease-free seeds and transplants", "Completely avoid overhead watering - use drip irrigation only", "Remove and destroy infected plant parts immediately", "Rotate tomatoes with non-host crops (corn, beans) for minimum 2 years", "Disinfect all tools with 10% bleach solution after each use", "Space plants widely (24-36 inches) for excellent air circulation", "Apply preventive copper sprays before rainy season", "Never work in tomato field when plants are wet", "Use resistant varieties when available"],
+    "when_to_treat": "Start treatment IMMEDIATELY when first spots appear. Bacterial spot spreads extremely rapidly through water splash and can destroy entire crop within 2-3 weeks if untreated."
+  },
+
+  "Tomato___Early_blight": {
+    "disease_name": "Early Blight of Tomato",
+    "plant": "Tomato",
+    "description": "Common fungal disease causing characteristic target-spot lesions on older leaves, leading to defoliation and reduced fruit quality",
+    "causes": ["Alternaria solani fungus", "High humidity (90%+) with moderate temperatures (24-29°C)", "Poor air circulation around plants", "Nutritional stress or weakened plants", "Water stress alternating with wet periods"],
+    "chemical_treatments": [
+      {"name": "Mancozeb 75% WP", "dosage": "2.5 grams per liter", "application": "Spray every 7-10 days, start at first bloom", "cost": "₹200-300 per 500g"},
+      {"name": "Chlorothalonil 75% WP", "dosage": "2 grams per liter", "application": "Apply at 10-day intervals during humid weather", "cost": "₹300-400 per 250g"},
+      {"name": "Azoxystrobin 23% SC", "dosage": "1ml per liter", "application": "Spray at 2-week intervals, alternate with other fungicides", "cost": "₹600-700 per 100ml"}
+    ],
+    "organic_treatments": [
+      {"name": "Baking Soda + Oil Spray", "dosage": "1 tablespoon baking soda + 1 tablespoon oil + few drops soap per liter", "application": "Spray weekly, increases leaf pH making it unfavorable for fungus", "cost": "₹50 (homemade)"},
+      {"name": "Compost Tea (Aerobic)", "dosage": "500ml well-aerated compost tea per liter water", "application": "Spray twice weekly, beneficial microbes suppress disease", "cost": "Free (homemade from compost)"},
+      {"name": "Trichoderma viride", "dosage": "5g per liter", "application": "Spray every 10 days throughout season", "cost": "₹200-300 per 100g"}
+    ],
+    "prevention_tips": ["Apply thick organic mulch (4-6 inches) around plants to prevent soil splash onto lower leaves", "Water ONLY at soil level early in morning, never wet foliage", "Remove and destroy lowest 4-6 leaves that touch soil", "Stake or cage all tomato plants to improve air circulation and keep leaves off ground", "Rotate tomatoes with non-solanaceous crops (corn, beans, squash) every 2-3 years", "Remove and dispose of all infected leaves immediately (burn or trash, not compost)", "Maintain proper plant nutrition, especially potassium and calcium", "Space plants 24-36 inches apart", "Apply preventive fungicide sprays starting at first flower"],
+    "when_to_treat": "Begin treatment at first sign of target-spot lesions on lower leaves. Early blight is most effectively managed when caught early. Disease is most aggressive during fruit development stage."
+  }
+}
