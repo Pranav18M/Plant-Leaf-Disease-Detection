@@ -1,22 +1,31 @@
-# Core Dependencies for Plant Leaf Disease Detection System
-# Install using: pip install -r requirements.txt
+# Plant Disease Detection System - Dependencies
+# Python 3.8+ required
+
+# Core Machine Learning
+numpy==1.24.3
+scikit-learn==1.3.0
+scikit-image==0.21.0
+joblib==1.3.2
 
 # Image Processing
-opencv-python==4.8.1.78
-opencv-contrib-python==4.8.1.78
-scikit-image==0.22.0
-Pillow==10.1.0
-
-# Machine Learning
-scikit-learn==1.3.2
-numpy==1.24.3
+opencv-python==4.8.0.76
+opencv-contrib-python==4.8.0.76
+Pillow==10.0.0
 
 # Visualization
-matplotlib==3.8.2
+matplotlib==3.7.2
 
-# Utilities
-joblib==1.3.2
+# Data Handling
+pandas==2.0.3
+
+# Progress Bars (Optional)
 tqdm==4.66.1
 
-# Optional: For better progress bars
-colorama==0.4.6
+# Image Augmentation
+imgaug==0.4.0
+
+# GUI Support
+tk==0.1.0
+
+# Additional Dependencies
+scipy==1.11.2
