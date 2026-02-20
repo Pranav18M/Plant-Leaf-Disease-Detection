@@ -1,5 +1,5 @@
 """
-Prediction with Separate Treatment Page
+Plant Disease Detection with Tamil Support - FINAL CLEAN VERSION
 """
 
 import os
@@ -9,8 +9,8 @@ import numpy as np
 import cv2
 import joblib
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyArrowPatch, Rectangle
 from tkinter import Tk, filedialog
+from PIL import Image, ImageDraw, ImageFont
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -21,13 +21,57 @@ from preprocessing import preprocess_pipeline, preprocess_image
 from feature_extraction import extract_all_features
 
 
+def get_tamil_font(size=20):
+    """Load Tamil font from font folder"""
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    font_path = os.path.join(project_root, 'font', 'NotoSansTamil-Regular.ttf')
+    
+    try:
+        return ImageFont.truetype(font_path, size)
+    except:
+        return ImageFont.load_default()
+
+
+def create_tamil_image(text, font_size=20, color=(255, 215, 0)):
+    """Create PIL image with Tamil text - color as RGB tuple"""
+    font = get_tamil_font(font_size)
+    
+    dummy = Image.new('RGB', (1, 1))
+    draw = ImageDraw.Draw(dummy)
+    bbox = draw.textbbox((0, 0), text, font=font)
+    w = bbox[2] - bbox[0] + 20
+    h = bbox[3] - bbox[1] + 10
+    
+    img = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.text((10, 5), text, font=font, fill=color)
+    
+    return np.array(img)
+
+
 def load_treatment_database():
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     treatment_file = os.path.join(project_root, 'data', 'disease_treatments.json')
-    if not os.path.exists(treatment_file):
-        return {}
     with open(treatment_file, 'r', encoding='utf-8') as f:
         return json.load(f)
+
+
+def load_tamil_translations():
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    tamil_file = os.path.join(project_root, 'data', 'disease_translations_tamil.json')
+    with open(tamil_file, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def load_tamil_treatments():
+    """Load Tamil treatment translations"""
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    tamil_treat_file = os.path.join(project_root, 'data', 'treatment_translations_tamil.json')
+    try:
+        with open(tamil_treat_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return {}
 
 
 def load_trained_model():
@@ -51,7 +95,7 @@ def select_image():
     return image_path
 
 
-def predict_disease(image_path, model, scaler, label_encoder, class_names, treatment_db, visualize=True):
+def predict_disease(image_path, model, scaler, label_encoder, class_names, treatment_db, tamil_db, tamil_treatments_db, visualize=True):
     image = cv2.imread(image_path)
     original_image = image.copy()
     
@@ -73,23 +117,26 @@ def predict_disease(image_path, model, scaler, label_encoder, class_names, treat
     
     confidence = 85 + (base_confidence / 100) * 10
     confidence = min(95, max(85, confidence))
+    
     treatment_info = treatment_db.get(prediction, None)
+    tamil_info = tamil_db.get(prediction, {})
     
     if visualize:
-        # Main prediction page
         visualize_prediction(original_image, resized, enhanced, no_bg, blurred,
-                           color_converted, segmented, prediction, confidence, image_path)
+                           color_converted, segmented, prediction, confidence, 
+                           tamil_info, image_path)
         
-        # Separate treatment page
         if treatment_info:
-            visualize_treatment_page(prediction, confidence, treatment_info, image_path)
+            visualize_treatment_page(prediction, confidence, treatment_info, 
+                                   tamil_info, tamil_treatments_db, image_path)
     
     return prediction, confidence, treatment_info
 
 
 def visualize_prediction(original, resized, enhanced, no_bg, blurred, 
-                        color_converted, segmented, prediction, confidence, image_path):
-    """Main prediction page - 9 cards only"""
+                        color_converted, segmented, prediction, confidence, 
+                        tamil_info, image_path):
+    """Main prediction page"""
     BG_DARK = '#1a1a2e'
     BG_CARD = '#16213e'
     BG_TITLE = '#0f3460'
@@ -100,7 +147,6 @@ def visualize_prediction(original, resized, enhanced, no_bg, blurred,
 
     fig = plt.figure(figsize=(24, 14), facecolor=BG_DARK)
 
-    # Title
     title_ax = fig.add_axes([0.0, 0.92, 1.0, 0.08])
     title_ax.set_facecolor('#0d1b2a')
     title_ax.axis('off')
@@ -114,15 +160,9 @@ def visualize_prediction(original, resized, enhanced, no_bg, blurred,
     line_ax.axis('off')
 
     card_positions = [
-        [0.02, 0.61, 0.30, 0.295],
-        [0.345, 0.61, 0.30, 0.295],
-        [0.67, 0.61, 0.305, 0.295],
-        [0.02, 0.30, 0.30, 0.295],
-        [0.345, 0.30, 0.30, 0.295],
-        [0.67, 0.30, 0.305, 0.295],
-        [0.02, 0.02, 0.30, 0.26],
-        [0.345, 0.02, 0.30, 0.26],
-        [0.67, 0.02, 0.305, 0.26],
+        [0.02, 0.61, 0.30, 0.295], [0.345, 0.61, 0.30, 0.295], [0.67, 0.61, 0.305, 0.295],
+        [0.02, 0.30, 0.30, 0.295], [0.345, 0.30, 0.30, 0.295], [0.67, 0.30, 0.305, 0.295],
+        [0.02, 0.02, 0.30, 0.26], [0.345, 0.02, 0.30, 0.26], [0.67, 0.02, 0.305, 0.26],
     ]
 
     titles = [
@@ -131,11 +171,8 @@ def visualize_prediction(original, resized, enhanced, no_bg, blurred,
         'Disease Region Segmented', 'Processing Pipeline', 'Final Prediction'
     ]
 
-    step_colors = [
-        '#e74c3c', '#e67e22', '#f1c40f',
-        '#27ae60', '#16a085', '#2980b9',
-        '#8e44ad', '#d35400', '#27ae60'
-    ]
+    step_colors = ['#e74c3c', '#e67e22', '#f1c40f', '#27ae60', '#16a085', 
+                   '#2980b9', '#8e44ad', '#d35400', '#27ae60']
 
     images_list = [
         cv2.cvtColor(original, cv2.COLOR_BGR2RGB),
@@ -147,10 +184,9 @@ def visualize_prediction(original, resized, enhanced, no_bg, blurred,
         cv2.cvtColor(segmented, cv2.COLOR_BGR2RGB)
     ]
 
-    TITLE_H = 0.042
-    PAD = 0.012
+    TITLE_H, PAD = 0.042, 0.012
 
-    # Draw image cards 1-7
+    # Cards 1-7
     for i in range(7):
         L, B, W, H = card_positions[i]
         
@@ -226,23 +262,20 @@ def visualize_prediction(original, resized, enhanced, no_bg, blurred,
     y0, dy = 0.90, 0.115
     for idx, (txt, clr) in enumerate(pipe_steps):
         y = y0 - idx * dy
-        ax_pipe.plot(0.07, y, 'o', color=clr, markersize=12,
-                     transform=ax_pipe.transAxes, clip_on=False)
+        ax_pipe.plot(0.07, y, 'o', color=clr, markersize=12, transform=ax_pipe.transAxes)
         ax_pipe.text(0.07, y, str(idx+1), fontsize=8, fontweight='bold',
-                     color='white', ha='center', va='center',
-                     transform=ax_pipe.transAxes)
+                     color='white', ha='center', va='center', transform=ax_pipe.transAxes)
         if idx < len(pipe_steps) - 1:
             ax_pipe.plot([0.07, 0.07], [y - 0.025, y - dy + 0.025],
-                         color='#5d6d7e', linewidth=2.5,
-                         transform=ax_pipe.transAxes, clip_on=False)
+                         color='#5d6d7e', linewidth=2.5, transform=ax_pipe.transAxes)
         ax_pipe.text(0.17, y, txt, fontsize=11, fontweight='bold',
-                     color=TEXT_WHITE, va='center',
-                     transform=ax_pipe.transAxes)
+                     color=TEXT_WHITE, va='center', transform=ax_pipe.transAxes)
 
-    # Card 9 - Prediction
+    # Card 9 - Prediction WITH TAMIL IMAGE
     L, B, W, H = card_positions[8]
     
     disease_name = prediction.replace('___', ' - ').replace('_', ' ').title()
+    tamil_name = tamil_info.get('tamil_name', '')
     is_healthy = 'healthy' in prediction.lower()
 
     if is_healthy:
@@ -283,128 +316,235 @@ def visualize_prediction(original, resized, enhanced, no_bg, blurred,
         sp.set_color(res_border); sp.set_linewidth(2)
     ax_res.set_xticks([]); ax_res.set_yticks([])
 
-    ax_res.text(0.5, 0.88, f'{status_icon}  {status_txt}', fontsize=16, fontweight='bold',
+    ax_res.text(0.5, 0.92, f'{status_icon}  {status_txt}', fontsize=13, fontweight='bold',
                 color=status_clr, ha='center', va='center',
-                bbox=dict(boxstyle='round,pad=0.4', facecolor='#1a1a2e',
-                         edgecolor=status_clr, linewidth=2.5))
+                bbox=dict(boxstyle='round,pad=0.25', facecolor='#1a1a2e',
+                         edgecolor=status_clr, linewidth=2))
 
-    ax_res.plot([0.08, 0.92], [0.74, 0.74], color='white', linewidth=1, alpha=0.25)
+    ax_res.plot([0.08, 0.92], [0.78, 0.78], color='white', linewidth=1, alpha=0.25)
 
-    ax_res.text(0.5, 0.64, 'DETECTED DISEASE', fontsize=10, color='#bdc3c7',
-                ha='center', va='center', style='italic')
-
-    ax_res.text(0.5, 0.48, disease_name, fontsize=19, fontweight='bold',
+    # English name - moved up
+    ax_res.text(0.5, 0.68, disease_name, fontsize=14, fontweight='bold',
                 color='white', ha='center', va='center')
 
-    ax_res.plot([0.08, 0.92], [0.33, 0.33], color='white', linewidth=1, alpha=0.25)
+    # Tamil name as IMAGE - moved down with bigger size
+    if tamil_name:
+        tamil_img = create_tamil_image(tamil_name, font_size=34)
+        ax_tamil = fig.add_axes([L + W/2 - 0.10, B + 0.11, 0.20, 0.045])
+        ax_tamil.imshow(tamil_img)
+        ax_tamil.axis('off')
 
-    ax_res.text(0.5, 0.24, 'CONFIDENCE LEVEL', fontsize=10, color='#bdc3c7',
+    ax_res.plot([0.08, 0.92], [0.32, 0.32], color='white', linewidth=1, alpha=0.25)
+
+    ax_res.text(0.5, 0.18, 'CONFIDENCE', fontsize=9, color='#bdc3c7',
                 ha='center', va='center', style='italic')
 
-    ax_res.text(0.5, 0.09, f'{confidence:.2f}%', fontsize=26, fontweight='bold',
+    ax_res.text(0.5, 0.06, f'{confidence:.1f}%', fontsize=20, fontweight='bold',
                 color=res_glow, ha='center', va='center')
 
     output_filename = f"prediction_{os.path.splitext(os.path.basename(image_path))[0]}.png"
     output_path = os.path.join(config.RESULTS_DIR, output_filename)
     plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor=BG_DARK, edgecolor='none')
     print(f"✓ Main page saved: {output_path}")
-    plt.show(block=False)  # Don't block, show and continue
-    plt.pause(0.5)  # Small pause to render
+    plt.show(block=False)
+    plt.pause(0.5)
 
 
-def visualize_treatment_page(prediction, confidence, treatment_info, image_path):
-    """Separate clean treatment page - reduced fonts, better spacing"""
+def visualize_treatment_page(prediction, confidence, treatment_info, tamil_info, tamil_treatments_db, image_path):
+    """Create 2 separate treatment pages - English and Tamil"""
+    
+    # PAGE 1: ENGLISH ONLY
+    create_english_treatment_page(prediction, confidence, treatment_info, image_path)
+    
+    # PAGE 2: TAMIL ONLY
+    create_tamil_treatment_page(prediction, confidence, tamil_info, tamil_treatments_db, image_path)
+
+
+def create_english_treatment_page(prediction, confidence, treatment_info, image_path):
+    """English treatment page only"""
     BG_DARK = '#1a1a2e'
     TEXT_WHITE = '#ecf0f1'
     TEXT_GRAY = '#95a5a6'
 
-    fig = plt.figure(figsize=(20, 14), facecolor=BG_DARK)  # Taller for more space
+    fig = plt.figure(figsize=(20, 14), facecolor=BG_DARK)
     
-    # Title - TOP
+    # Title
     fig.text(0.5, 0.98, 'Treatment Recommendations',
-             fontsize=28, fontweight='bold', color=TEXT_WHITE,
-             ha='center', va='top')
+             fontsize=28, fontweight='bold', color=TEXT_WHITE, ha='center', va='top')
     
-    # Horizontal line under title
     fig.add_artist(plt.Line2D([0.1, 0.9], [0.95, 0.95], color='#27ae60', linewidth=2))
     
-    # Disease name - MOVED DOWN
+    # Disease name
     disease_name = prediction.replace('___', ' - ').replace('_', ' ').title()
-    fig.text(0.5, 0.92, f'{disease_name}',
-             fontsize=16, color='#ecf0f1', fontweight='bold',
-             ha='center', va='top')
+    fig.text(0.5, 0.92, disease_name, fontsize=18, color='#ecf0f1', fontweight='bold', ha='center', va='top')
     
-    # Confidence - MOVED DOWN
-    fig.text(0.5, 0.89, f'Confidence: {confidence:.1f}%',
-             fontsize=12, color='#3498db',
-             ha='center', va='top')
+    fig.text(0.5, 0.89, f'Confidence: {confidence:.1f}%', fontsize=12, color='#3498db', ha='center', va='top')
     
-    # Description - MOVED DOWN
-    fig.text(0.5, 0.85, f"📝 {treatment_info['description']}",
-             fontsize=11, color=TEXT_WHITE, ha='center', va='top',
-             fontweight='bold')
+    fig.text(0.5, 0.85, f"📝 {treatment_info['description']}", fontsize=11, color=TEXT_WHITE, 
+             ha='center', va='top', fontweight='bold')
     
-    # Column 1: Chemical Treatments
+    # Chemical Treatments
     y_start = 0.78
-    fig.text(0.08, y_start, '🧪 Chemical Treatments',
-             fontsize=14, fontweight='bold', color='#3498db', va='top')
+    fig.text(0.05, y_start, '🧪 Chemical Treatments', fontsize=15, fontweight='bold', color='#3498db', va='top')
     
     y_pos = y_start - 0.06
     for idx, treat in enumerate(treatment_info['chemical_treatments'][:3], 1):
-        fig.text(0.08, y_pos, f"{idx}. {treat['name']}",
-                 fontsize=11, fontweight='bold', color=TEXT_WHITE, va='top')
+        fig.text(0.05, y_pos, f"{idx}. {treat['name']}", fontsize=12, fontweight='bold', color=TEXT_WHITE, va='top')
+        y_pos -= 0.035
+        fig.text(0.08, y_pos, f"💧 Dosage: {treat['dosage']}", fontsize=10, color=TEXT_GRAY, va='top')
         y_pos -= 0.03
-        fig.text(0.10, y_pos, f"💧 Dosage: {treat['dosage']}",
-                 fontsize=9, color=TEXT_GRAY, va='top')
-        y_pos -= 0.025
-        fig.text(0.10, y_pos, f"📅 Application: {treat['application']}",
-                 fontsize=9, color=TEXT_GRAY, va='top')
-        y_pos -= 0.025
-        fig.text(0.10, y_pos, f"💰 Cost: {treat['cost']}",
-                 fontsize=9, color='#f39c12', fontweight='bold', va='top')
-        y_pos -= 0.05
+        fig.text(0.08, y_pos, f"📅 Application: {treat['application']}", fontsize=10, color=TEXT_GRAY, va='top')
+        y_pos -= 0.03
+        fig.text(0.08, y_pos, f"💰 Cost: {treat['cost']}", fontsize=10, color='#f39c12', fontweight='bold', va='top')
+        y_pos -= 0.06
     
-    # Column 2: Organic Treatments
+    # Organic Treatments
     y_pos = y_start - 0.06
-    fig.text(0.52, y_start, '🌿 Organic Treatments',
-             fontsize=14, fontweight='bold', color='#27ae60', va='top')
+    fig.text(0.52, y_start, '🌿 Organic Treatments', fontsize=15, fontweight='bold', color='#27ae60', va='top')
     
     for idx, treat in enumerate(treatment_info['organic_treatments'][:3], 1):
-        fig.text(0.52, y_pos, f"{idx}. {treat['name']}",
-                 fontsize=11, fontweight='bold', color=TEXT_WHITE, va='top')
+        fig.text(0.52, y_pos, f"{idx}. {treat['name']}", fontsize=12, fontweight='bold', color=TEXT_WHITE, va='top')
+        y_pos -= 0.035
+        fig.text(0.55, y_pos, f"💧 Dosage: {treat['dosage']}", fontsize=10, color=TEXT_GRAY, va='top')
         y_pos -= 0.03
-        fig.text(0.54, y_pos, f"💧 Dosage: {treat['dosage']}",
-                 fontsize=9, color=TEXT_GRAY, va='top')
-        y_pos -= 0.025
-        fig.text(0.54, y_pos, f"📅 Application: {treat['application']}",
-                 fontsize=9, color=TEXT_GRAY, va='top')
-        y_pos -= 0.025
-        fig.text(0.54, y_pos, f"💰 Cost: {treat['cost']}",
-                 fontsize=9, color='#f39c12', fontweight='bold', va='top')
-        y_pos -= 0.05
+        fig.text(0.55, y_pos, f"📅 Application: {treat['application']}", fontsize=10, color=TEXT_GRAY, va='top')
+        y_pos -= 0.03
+        fig.text(0.55, y_pos, f"💰 Cost: {treat['cost']}", fontsize=10, color='#f39c12', fontweight='bold', va='top')
+        y_pos -= 0.06
     
-    # Prevention Tips - Full Width
-    fig.text(0.5, 0.38, '🛡️ Prevention Tips',
-             fontsize=14, fontweight='bold', color='#f39c12',
-             ha='center', va='top')
+    # When to treat
+    fig.text(0.5, 0.08, f"⏰ {treatment_info['when_to_treat']}", fontsize=12, fontweight='bold', color='#e74c3c',
+             ha='center', va='center', bbox=dict(boxstyle='round,pad=0.8', facecolor='#16213e',
+                                                  edgecolor='#e74c3c', linewidth=2.5))
     
-    y_pos = 0.35
-    for idx, tip in enumerate(treatment_info['prevention_tips'][:8], 1):
-        fig.text(0.5, y_pos, f"{idx}. {tip}",
-                 fontsize=10, color=TEXT_GRAY, ha='center', va='top')
-        y_pos -= 0.028
-    
-    # When to Treat - Bottom
-    fig.text(0.5, 0.06, f"⏰ {treatment_info['when_to_treat']}",
-             fontsize=11, fontweight='bold', color='#e74c3c',
-             ha='center', va='center',
-             bbox=dict(boxstyle='round,pad=0.8', facecolor='#16213e',
-                      edgecolor='#e74c3c', linewidth=2.5))
-    
-    output_filename = f"treatment_{os.path.splitext(os.path.basename(image_path))[0]}.png"
+    output_filename = f"treatment_english_{os.path.splitext(os.path.basename(image_path))[0]}.png"
     output_path = os.path.join(config.RESULTS_DIR, output_filename)
     plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor=BG_DARK, edgecolor='none')
-    print(f"✓ Treatment page saved: {output_path}")
+    print(f"✓ English treatment page saved: {output_path}")
+    plt.show(block=False)
+    plt.pause(0.3)
+
+
+def create_tamil_treatment_page(prediction, confidence, tamil_info, tamil_treatments_db, image_path):
+    """Tamil treatment page - MUCH BIGGER BOLD FONTS"""
+    BG_DARK = '#1a1a2e'
+    
+    # RGB colors for PIL images
+    WHITE_RGB = (236, 240, 241)      # #ecf0f1
+    GRAY_RGB = (149, 165, 166)       # #95a5a6  
+    ORANGE_RGB = (243, 156, 18)      # #f39c12
+    GOLD_RGB = (255, 215, 0)         # #ffd700
+
+    fig = plt.figure(figsize=(20, 14), facecolor=BG_DARK)
+    
+    # Title - GOLD - MUCH BIGGER
+    tamil_title_img = create_tamil_image('சிகிச்சை பரிந்துரைகள்', font_size=70, color=GOLD_RGB)
+    ax_title = fig.add_axes([0.22, 0.955, 0.56, 0.045])
+    ax_title.imshow(tamil_title_img)
+    ax_title.axis('off')
+    
+    fig.add_artist(plt.Line2D([0.1, 0.9], [0.95, 0.95], color='#27ae60', linewidth=2))
+    
+    # Disease name - WHITE - MUCH BIGGER
+    tamil_name = tamil_info.get('tamil_name', '')
+    if tamil_name:
+        tamil_disease_img = create_tamil_image(tamil_name, font_size=48, color=WHITE_RGB)
+        ax_disease = fig.add_axes([0.18, 0.91, 0.64, 0.04])
+        ax_disease.imshow(tamil_disease_img)
+        ax_disease.axis('off')
+    
+    fig.text(0.5, 0.87, f'நம்பகத்தன்மை: {confidence:.1f}%', fontsize=14, color='#3498db', ha='center', va='top', weight='bold')
+    
+    # Description - WHITE - MUCH BIGGER
+    tamil_desc = tamil_info.get('tamil_description', '')
+    if tamil_desc:
+        tamil_desc_img = create_tamil_image(f"📝 {tamil_desc}", font_size=32, color=WHITE_RGB)
+        ax_desc = fig.add_axes([0.03, 0.825, 0.94, 0.04])
+        ax_desc.imshow(tamil_desc_img)
+        ax_desc.axis('off')
+    
+    # Get Tamil treatments
+    tamil_treatments = tamil_treatments_db.get(prediction, {})
+    
+    # Chemical Treatments - MUCH BIGGER header
+    y_start = 0.75
+    chem_header_img = create_tamil_image('🧪 இரசாயன சிகிச்சை', font_size=44, color=(52, 152, 219))  # BLUE
+    ax_chem_h = fig.add_axes([0.05, y_start, 0.35, 0.035])
+    ax_chem_h.imshow(chem_header_img)
+    ax_chem_h.axis('off')
+    
+    y_pos = y_start - 0.07
+    tamil_chem_list = tamil_treatments.get('chemical_treatments_tamil', [])
+    for idx, treat in enumerate(tamil_chem_list[:3], 1):
+        # Name - WHITE - MUCH BIGGER
+        name_img = create_tamil_image(f"{idx}. {treat['name']}", font_size=32, color=WHITE_RGB)
+        ax_name = fig.add_axes([0.05, y_pos, 0.42, 0.032])
+        ax_name.imshow(name_img)
+        ax_name.axis('off')
+        y_pos -= 0.045
+        
+        # Dosage - GRAY - MUCH BIGGER
+        dose_img = create_tamil_image(f"💧 {treat['dosage']}", font_size=28, color=GRAY_RGB)
+        ax_dose = fig.add_axes([0.08, y_pos, 0.40, 0.03])
+        ax_dose.imshow(dose_img)
+        ax_dose.axis('off')
+        y_pos -= 0.04
+        
+        # Application - GRAY - MUCH BIGGER
+        app_img = create_tamil_image(f"📅 {treat['application']}", font_size=28, color=GRAY_RGB)
+        ax_app = fig.add_axes([0.08, y_pos, 0.40, 0.03])
+        ax_app.imshow(app_img)
+        ax_app.axis('off')
+        y_pos -= 0.04
+        
+        # Cost - ORANGE - MUCH BIGGER
+        cost_img = create_tamil_image(f"💰 {treat['cost']}", font_size=28, color=ORANGE_RGB)
+        ax_cost = fig.add_axes([0.08, y_pos, 0.40, 0.03])
+        ax_cost.imshow(cost_img)
+        ax_cost.axis('off')
+        y_pos -= 0.07
+    
+    # Organic Treatments - MUCH BIGGER header
+    y_pos = y_start - 0.07
+    org_header_img = create_tamil_image('🌿 இயற்கை சிகிச்சை', font_size=44, color=(39, 174, 96))  # GREEN
+    ax_org_h = fig.add_axes([0.52, y_start, 0.35, 0.035])
+    ax_org_h.imshow(org_header_img)
+    ax_org_h.axis('off')
+    
+    tamil_org_list = tamil_treatments.get('organic_treatments_tamil', [])
+    for idx, treat in enumerate(tamil_org_list[:3], 1):
+        # Name - WHITE - MUCH BIGGER
+        name_img = create_tamil_image(f"{idx}. {treat['name']}", font_size=32, color=WHITE_RGB)
+        ax_name = fig.add_axes([0.52, y_pos, 0.42, 0.032])
+        ax_name.imshow(name_img)
+        ax_name.axis('off')
+        y_pos -= 0.045
+        
+        # Dosage - GRAY - MUCH BIGGER
+        dose_img = create_tamil_image(f"💧 {treat['dosage']}", font_size=28, color=GRAY_RGB)
+        ax_dose = fig.add_axes([0.55, y_pos, 0.40, 0.03])
+        ax_dose.imshow(dose_img)
+        ax_dose.axis('off')
+        y_pos -= 0.04
+        
+        # Application - GRAY - MUCH BIGGER
+        app_img = create_tamil_image(f"📅 {treat['application']}", font_size=28, color=GRAY_RGB)
+        ax_app = fig.add_axes([0.55, y_pos, 0.40, 0.03])
+        ax_app.imshow(app_img)
+        ax_app.axis('off')
+        y_pos -= 0.04
+        
+        # Cost - ORANGE - MUCH BIGGER
+        cost_img = create_tamil_image(f"💰 {treat['cost']}", font_size=28, color=ORANGE_RGB)
+        ax_cost = fig.add_axes([0.55, y_pos, 0.40, 0.03])
+        ax_cost.imshow(cost_img)
+        ax_cost.axis('off')
+        y_pos -= 0.07
+    
+    output_filename = f"treatment_tamil_{os.path.splitext(os.path.basename(image_path))[0]}.png"
+    output_path = os.path.join(config.RESULTS_DIR, output_filename)
+    plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor=BG_DARK, edgecolor='none')
+    print(f"✓ Tamil treatment page saved: {output_path}")
     plt.show()
 
 
@@ -414,6 +554,8 @@ def main():
     print("="*80 + "\n")
 
     treatment_db = load_treatment_database()
+    tamil_db = load_tamil_translations()
+    tamil_treatments_db = load_tamil_treatments()
     model, scaler, label_encoder, class_names = load_trained_model()
     
     image_path = select_image()
@@ -421,8 +563,8 @@ def main():
         return
     
     predict_disease(image_path, model, scaler, label_encoder, class_names,
-                   treatment_db, visualize=True)
-    print("\n✓ Complete! 2 pages generated.\n")
+                   treatment_db, tamil_db, tamil_treatments_db, visualize=True)
+    print("\n✓ Complete! 3 pages generated (prediction + English + Tamil).\n")
 
 
 if __name__ == "__main__":
