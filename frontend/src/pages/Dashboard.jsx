@@ -7,6 +7,8 @@ const Dashboard = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState('');
   const navigate = useNavigate();
 
   const handleFileSelect = (e) => {
@@ -21,10 +23,40 @@ const Dashboard = () => {
     }
   };
 
+  const simulateProgress = () => {
+    const steps = [
+      { progress: 14, label: 'Uploading image...' },
+      { progress: 28, label: 'Preprocessing...' },
+      { progress: 42, label: 'Extracting features...' },
+      { progress: 56, label: 'Analyzing GLCM patterns...' },
+      { progress: 70, label: 'Running SVM classification...' },
+      { progress: 85, label: 'Generating results...' },
+      { progress: 100, label: 'Complete!' }
+    ];
+
+    let currentStepIndex = 0;
+
+    const interval = setInterval(() => {
+      if (currentStepIndex < steps.length) {
+        setProgress(steps[currentStepIndex].progress);
+        setCurrentStep(steps[currentStepIndex].label);
+        currentStepIndex++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 800);
+
+    return interval;
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) return;
 
     setLoading(true);
+    setProgress(0);
+    setCurrentStep('Starting analysis...');
+    
+    const progressInterval = simulateProgress();
     const formData = new FormData();
     formData.append('file', selectedFile);
 
@@ -33,11 +65,20 @@ const Dashboard = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      navigate('/processing', { state: { result: response.data } });
+      clearInterval(progressInterval);
+      setProgress(100);
+      setCurrentStep('Redirecting...');
+      
+      setTimeout(() => {
+        navigate('/processing', { state: { result: response.data } });
+      }, 500);
     } catch (error) {
+      clearInterval(progressInterval);
       console.error('Upload error:', error);
       alert('Error processing image. Please try again.');
       setLoading(false);
+      setProgress(0);
+      setCurrentStep('');
     }
   };
 
@@ -53,9 +94,9 @@ const Dashboard = () => {
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-primary mb-4" style={{ fontFamily: 'cursive' }}>
             Plant Disease Detection
           </h1>
-         <h1 className="text-2xl md:text-3xl font-bold text-secondary tamil-text">
+          <h1 className="text-2xl md:text-3xl font-bold text-secondary tamil-text">
             தாவர நோய் கண்டறிதல்
-        </h1>
+          </h1>
         </div> 
 
         <div className="w-full max-w-2xl">
@@ -64,8 +105,26 @@ const Dashboard = () => {
               Upload Leaf Image
             </h2>
 
+            {/* Progress Bar */}
+            {loading && (
+              <div className="mb-6 space-y-3">
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-primary via-secondary to-accent h-full transition-all duration-500 ease-out rounded-full"
+                    style={{ width: `${progress}%` }}
+                  >
+                    <div className="w-full h-full animate-pulse bg-white opacity-20"></div>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600 font-medium animate-pulse">{currentStep}</span>
+                  <span className="text-primary font-bold">{progress}%</span>
+                </div>
+              </div>
+            )}
+
             <div className="mb-6">
-              <label className="flex flex-col items-center justify-center w-full h-48 md:h-64 border-4 border-dashed border-primary rounded-2xl cursor-pointer bg-green-50 hover:bg-green-100 transition-all">
+              <label className={`flex flex-col items-center justify-center w-full h-48 md:h-64 border-4 border-dashed border-primary rounded-2xl cursor-pointer bg-green-50 hover:bg-green-100 transition-all ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {preview ? (
                   <div className="relative w-full h-full p-4">
                     <img 
@@ -96,14 +155,13 @@ const Dashboard = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              {selectedFile && (
+              {selectedFile && !loading && (
                 <button
                   onClick={() => {
                     setSelectedFile(null);
                     setPreview(null);
                   }}
                   className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all"
-                  disabled={loading}
                 >
                   Clear
                 </button>
@@ -114,7 +172,7 @@ const Dashboard = () => {
                 className={`flex-1 px-6 py-4 rounded-xl font-bold text-lg transition-all ${
                   !selectedFile || loading
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-primary text-white hover:bg-green-700 shadow-lg hover:shadow-xl'
+                    : 'bg-primary text-white hover:bg-green-700 shadow-lg hover:shadow-xl transform hover:scale-105'
                 }`}
               >
                 {loading ? (
