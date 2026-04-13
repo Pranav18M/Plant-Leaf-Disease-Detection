@@ -47,28 +47,33 @@ const TreatmentEnglish = () => {
             </h3>
             
             <div className="space-y-6">
-              {treatment_english?.chemical_treatments?.slice(0, 3).map((treatment, index) => (
-                <div key={index} className="bg-gray-900 rounded-xl p-5 border border-gray-700 hover:border-blue-500 transition-all">
-                  <h4 className="font-bold text-white text-lg mb-3">
-                    {index + 1}. {treatment.name}
-                  </h4>
-                  
-                  <div className="space-y-2 text-sm">
-                    <p className="text-gray-400">
-                      <span className="font-semibold text-gray-300">💧 Dosage:</span> {treatment.dosage}
-                    </p>
-                    <p className="text-gray-400">
-                      <span className="font-semibold text-gray-300">📅 Application:</span> {treatment.application}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-red-400 text-xs line-through">Local: {treatment.cost}</span>
-                      <span className="text-green-400 font-bold text-sm">
-                        💰 Online: ₹{(parseInt(treatment.cost.match(/\d+/)[0]) * 0.85).toFixed(0)}
-                      </span>
+              {treatment_english?.chemical_treatments?.slice(0, 3)?.map((treatment, index) => {
+                const match = treatment.cost?.match(/\d+/);
+                const price = match ? parseInt(match[0]) : 0;
+
+                return (
+                  <div key={index} className="bg-gray-900 rounded-xl p-5 border border-gray-700 hover:border-blue-500 transition-all">
+                    <h4 className="font-bold text-white text-lg mb-3">
+                      {index + 1}. {treatment.name}
+                    </h4>
+                    
+                    <div className="space-y-2 text-sm">
+                      <p className="text-gray-400">
+                        <span className="font-semibold text-gray-300">💧 Dosage:</span> {treatment.dosage}
+                      </p>
+                      <p className="text-gray-400">
+                        <span className="font-semibold text-gray-300">📅 Application:</span> {treatment.application}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-red-400 text-xs line-through">Local: {treatment.cost}</span>
+                        <span className="text-green-400 font-bold text-sm">
+                          💰 Online: ₹{(price * 0.85).toFixed(0)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -79,28 +84,33 @@ const TreatmentEnglish = () => {
             </h3>
             
             <div className="space-y-6">
-              {treatment_english?.organic_treatments?.slice(0, 3).map((treatment, index) => (
-                <div key={index} className="bg-gray-900 rounded-xl p-5 border border-gray-700 hover:border-green-500 transition-all">
-                  <h4 className="font-bold text-white text-lg mb-3">
-                    {index + 1}. {treatment.name}
-                  </h4>
-                  
-                  <div className="space-y-2 text-sm">
-                    <p className="text-gray-400">
-                      <span className="font-semibold text-gray-300">💧 Dosage:</span> {treatment.dosage}
-                    </p>
-                    <p className="text-gray-400">
-                      <span className="font-semibold text-gray-300">📅 Application:</span> {treatment.application}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-red-400 text-xs line-through">Local: {treatment.cost}</span>
-                      <span className="text-green-400 font-bold text-sm">
-                        💰 Online: ₹{(parseInt(treatment.cost.match(/\d+/)[0]) * 0.85).toFixed(0)}
-                      </span>
+              {treatment_english?.organic_treatments?.slice(0, 3)?.map((treatment, index) => {
+                const match = treatment.cost?.match(/\d+/);
+                const price = match ? parseInt(match[0]) : 0;
+
+                return (
+                  <div key={index} className="bg-gray-900 rounded-xl p-5 border border-gray-700 hover:border-green-500 transition-all">
+                    <h4 className="font-bold text-white text-lg mb-3">
+                      {index + 1}. {treatment.name}
+                    </h4>
+                    
+                    <div className="space-y-2 text-sm">
+                      <p className="text-gray-400">
+                        <span className="font-semibold text-gray-300">💧 Dosage:</span> {treatment.dosage}
+                      </p>
+                      <p className="text-gray-400">
+                        <span className="font-semibold text-gray-300">📅 Application:</span> {treatment.application}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-red-400 text-xs line-through">Local: {treatment.cost}</span>
+                        <span className="text-green-400 font-bold text-sm">
+                          💰 Online: ₹{(price * 0.85).toFixed(0)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
